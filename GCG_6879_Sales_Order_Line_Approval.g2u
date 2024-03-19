@@ -1,0 +1,792 @@
+﻿Program.Sub.Preflight.Start
+v.Global.sFileLocation.Declare
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+Function.Intrinsic.UI.UsePixels ' Allows you to use Pixels instead of Twips throughout
+
+F.Intrinsic.Control.Try
+	
+	V.Local.sHook.Declare(String,"")
+	
+	F.ODBC.Connection!con.OpenCompanyConnection
+	
+	V.Local.sHook.Set(V.Caller.Hook)
+	
+	f.Intrinsic.Control.CallSub(CreateDir)
+	
+	F.Intrinsic.Control.SelectCase(V.Local.sHook)
+		'Hook 12010 is the Populate hook
+		F.Intrinsic.Control.Case("11560")
+			F.Intrinsic.Control.CallSub(PopulateHeader)
+			
+		'Hook 12010 is the Line populate Hook
+		F.Intrinsic.Control.Case("12010")
+			F.Intrinsic.Control.CallSub(PopulateLines)
+			
+		'Hook 11872 save Order Header hook
+		F.Intrinsic.Control.Case("11872")
+			F.Intrinsic.Control.CallSub(SaveHeader)
+			
+		'Hook 12230 save Order Line hook
+		F.Intrinsic.Control.Case("12230")
+			F.Intrinsic.Control.CallSub(SaveLine)
+			
+		'Hook 11565 is Order header selected hook
+		F.Intrinsic.Control.Case("11565")
+			F.Intrinsic.Control.CallSub(OrderHeaderSelected)
+			
+		'Hook 12705 is Order Line selected hook
+		F.Intrinsic.Control.Case("12705")
+			F.Intrinsic.Control.CallSub(OrderLineSelected)
+			
+		'Hook 16090 is Pre BI hook
+		F.Intrinsic.Control.Case("16090")
+			F.Intrinsic.Control.CallSub(PreBI)
+			
+			
+	F.Intrinsic.Control.EndSelect
+	
+	F.Intrinsic.Control.ExitSub
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+f.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.PopulateHeader.Start
+v.Local.sUserGroups.Declare
+v.Local.iRet1.Declare
+v.Local.iRet2.Declare
+v.Local.iRet3.Declare
+
+'This subroutine makes the custom checkbox and label visible to the user
+F.Intrinsic.Control.Try
+
+		
+	f.Global.Security.GetUserGroups(v.Caller.User,v.Caller.CompanyCode,v.Local.sUserGroups)
+
+	f.Intrinsic.String.Occurs(v.Local.sUserGroups,"SAAPROVE",v.Local.iRet1)
+'Testing purposes
+	'v.Local.iRet1.Set(0)
+
+	'If User is part of securty group 
+	f.Intrinsic.Control.If(v.Local.iRet1,=,1)
+	
+		'FOR Check BOX
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-CHK-1","PL",470)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-CHK-1","PT",543)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-CHK-1,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-CHK-1,"LOCK",1)
+		
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000061, "LOCK", 1)
+		V.Passed.GAB-CHK-1.Set("N")
+		
+		'FOR LABEL
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-1","PL",490)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-LBL-1","PT",543)
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-1", "PW", 120)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-LBL-1,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-LBL-1,"LOCK",1)
+		V.Passed.GAB-LBL-1.Set("Quality")
+	
+			'FOR CHECK BOX
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-CHK-2","PL",470)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-CHK-2","PT",561)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-CHK-2,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-CHK-2,"LOCK",1)
+		
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000061, "LOCK", 1)
+		V.Passed.GAB-CHK-2.Set("N")
+		
+		'FOR LABEL
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-2","PL",490)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-LBL-2","PT",561)
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-2", "PW", 120)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-LBL-2,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-LBL-2,"LOCK",1)
+		V.Passed.GAB-LBL-2.Set("Procurement/Engineering")
+	
+		'FOR CHECK BOX
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-CHK-3","PL",470)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-CHK-3","PT",578)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-CHK-3,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-CHK-3,"LOCK",1)
+		
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000061, "LOCK", 1)
+		V.Passed.GAB-CHK-3.Set("N")
+		
+		'FOR LABEL
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-3","PL",490)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-LBL-3","PT",578)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-LBL-3,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-LBL-3,"LOCK",1)
+		V.Passed.GAB-LBL-3.Set("Production")
+	
+	f.Intrinsic.Control.Else
+				'FOR Check BOX
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-CHK-1","PL",470)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-CHK-1","PT",543)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-CHK-1,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-CHK-1,"LOCK",1)
+		
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000061, "LOCK", 1)
+		V.Passed.GAB-CHK-1.Set("N")
+		
+		'FOR LABEL
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-1","PL",490)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-LBL-1","PT",543)
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-1", "PW", 120)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-LBL-1,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-LBL-1,"LOCK",1)
+		V.Passed.GAB-LBL-1.Set("Quality")
+	
+			'FOR CHECK BOX
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-CHK-2","PL",470)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-CHK-2","PT",561)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-CHK-2,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-CHK-2,"LOCK",1)
+		
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000061, "LOCK", 1)
+		V.Passed.GAB-CHK-2.Set("N")
+		
+		'FOR LABEL
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-2","PL",490)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-LBL-2","PT",561)
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-2", "PW", 120)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-LBL-2,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-LBL-2,"LOCK",1)
+		V.Passed.GAB-LBL-2.Set("Procurement/Engineering")
+	
+		'FOR CHECK BOX
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-CHK-3","PL",470)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-CHK-3","PT",578)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-CHK-3,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-CHK-3,"LOCK",1)
+		
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000061, "LOCK", 1)
+		V.Passed.GAB-CHK-3.Set("N")
+		
+		'FOR LABEL
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-3","PL",490)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-LBL-3","PT",578)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-LBL-3,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-LBL-3,"LOCK",1)
+		V.Passed.GAB-LBL-3.Set("Production")
+	
+	f.Intrinsic.Control.EndIf
+	
+	'FOR LABEL
+	'Set horizontal position
+	f.Intrinsic.Variable.SetProperty("GAB-LBL-4","PL",630)
+	'Set vertical position
+	F.Intrinsic.Variable.SetProperty("GAB-LBL-4","PT",543)
+	f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-LBL-4,"HIDE",0)
+	F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-LBL-4,"LOCK",0)
+	
+	F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000061, "LOCK", 1)
+	V.Passed.GAB-LBL-4.Set("Order Entry Complete (Y/N)")	
+		
+		
+	'FOR TEXT BOX
+	'Set horizontal position
+	f.Intrinsic.Variable.SetProperty("GAB-TEXT-1","PL",630)
+	'Set vertical position
+	F.Intrinsic.Variable.SetProperty("GAB-TEXT-1","PT",560)
+	
+	f.Intrinsic.Variable.SetProperty("GAB-TEXT-1","PW",30)
+	f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-TEXT-1,"HIDE",0)
+	F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-TEXT-1,"LOCK",0)
+	
+	'Change width of control so newly added controls are visible
+	f.Intrinsic.Variable.SetProperty("000208", "PW", 325)
+	
+	'f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-LBL-4,"HIDE",0)
+	v.Passed.000207.Set(1)
+	F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000207,"LOCK",1)
+	F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000208,"LOCK",1)
+
+	F.Intrinsic.Control.ExitSub
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+f.Intrinsic.Control.EndTry
+Program.Sub.PopulateHeader.End
+
+Program.Sub.PopulateLines.Start
+v.Local.sUserGroups.Declare
+v.Local.iRet2.Declare
+v.Local.iRet3.Declare
+v.Local.sPadOrderNo.Declare
+V.Local.sSql.Declare
+F.Intrinsic.Control.Try
+
+	f.Global.Security.GetUserGroups(v.Caller.User,v.Caller.CompanyCode.,v.Local.sUserGroups)
+
+	f.Intrinsic.String.Occurs(v.Local.sUserGroups,"SAAPROVE",v.Local.iRet2)
+	'f.Intrinsic.String.Occurs(v.Local.sUserGroups,"SAPROD",v.Local.iRet3)
+
+	'If User is part of securty group 2
+	f.Intrinsic.Control.If(v.Local.iRet2,=,1)
+		'FOR TEXT BOX
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-CHK-1","PL",10)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-CHK-1","PT",435)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-CHK-1,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-CHK-1,"LOCK",0)
+		
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000061, "LOCK", 1)
+		V.Passed.GAB-CHK-1.Set("N")
+	
+		'FOR LABEL
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-1","PL",30)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-LBL-1","PT",435)
+		'f.Intrinsic.Variable.SetProperty("GAB-LBL-1","PW",120)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-LBL-1,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-LBL-1,"LOCK",0)
+		V.Passed.GAB-LBL-1.Set("Procurement/Engineering")
+		
+	'f.Intrinsic.Control.EndIf
+	
+
+		'If User is part of securty group 3
+	'f.Intrinsic.Control.If(v.Local.iRet3,=,1)
+		'FOR CHECK BOX
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-CHK-2","PL",10)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-CHK-2","PT",455)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-CHK-2,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-CHK-2,"LOCK",0)
+		
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000061, "LOCK", 1)
+		V.Passed.GAB-CHK-2.Set("N")
+		
+		'FOR LABEL
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-2","PL",30)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-LBL-2","PT",455)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-LBL-2,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-LBL-2,"LOCK",0)
+		V.Passed.GAB-LBL-2.Set("Production")
+		
+		
+		
+		
+		'FOR TEXT BOX
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-TEXT-1","PL",220)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-TEXT-1","PT",435)
+		f.Intrinsic.Variable.SetProperty("GAB-TEXT-1","PW",15)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-TEXT-1,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-TEXT-1,"LOCK",0)
+		
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.000061, "LOCK", 1)
+		V.Passed.GAB-TEXT-1.Set("N")
+		
+		
+		'FOR LABEL
+		'Set horizontal position
+		f.Intrinsic.Variable.SetProperty("GAB-LBL-3","PL",240)
+		'Set vertical position
+		F.Intrinsic.Variable.SetProperty("GAB-LBL-3","PT",435)
+		f.Intrinsic.UI.ChangeCallerProperty(v.Passed.GAB-LBL-3,"HIDE",0)
+		F.Intrinsic.UI.ChangeCallerProperty(V.Passed.GAB-LBL-3,"LOCK",0)
+		V.Passed.GAB-LBL-3.Set("Quality (Y/N)")
+		
+		
+		
+		
+	f.Intrinsic.Control.EndIf	
+		
+	F.Intrinsic.String.LPad(V.Passed.000060,"0",7,v.Local.sPadOrderNo)
+	'Check table for check box values
+	F.Intrinsic.String.Build("Select DISTINCT * from GCG_6879_SALES_CHK where ORDER_NO = '{0}'", v.Local.sPadOrderNo, V.Local.sSql)
+	F.ODBC.Connection!con.OpenLocalRecordsetRW("rstCheck", V.Local.sSql)
+	
+	'If not empty, fill check boxes
+	f.Intrinsic.Control.If(V.ODBC.con!rstCheck.EOF, =, False)
+	
+		f.Intrinsic.Control.If(V.ODBC.con!rstCheck.FieldValTrim.PROCUREMENT_ENG,=,True)
+			v.Passed.GAB-CHK-1.Set("Y")
+		f.Intrinsic.Control.EndIf
+	
+		f.Intrinsic.Control.If(V.ODBC.con!rstCheck.FieldValTrim.PRODUCTION,=,True)
+			v.Passed.GAB-CHK-2.Set("Y")
+		f.Intrinsic.Control.EndIf
+		
+	f.Intrinsic.Control.EndIf
+	
+	f.ODBC.con!rstCheck.Close
+	
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+f.Intrinsic.Control.EndTry
+Program.Sub.PopulateLines.End
+
+Program.Sub.OrderHeaderSelected.Start
+v.Local.sSql.Declare
+v.Local.sPadOrderNo.Declare
+v.Local.sCustomPath.Declare
+v.Local.iC.Declare
+v.Local.bQualityFlag.Declare("Boolean",true)
+v.Local.bProcurementFlag.Declare("Boolean",true)
+v.Local.bProductionFlag.Declare("Boolean",true)
+F.Intrinsic.Control.Try
+
+	'Clear check boxes for next order
+	v.Passed.GAB-CHK-1.Set("N")
+	v.Passed.GAB-CHK-2.Set("N")
+	v.Passed.GAB-CHK-3.Set("N")
+	
+	f.Intrinsic.Control.If(v.DataTable.dtAllLines.Exists,=,true)
+		f.Data.DataTable.Close("dtAllLines")
+	f.Intrinsic.Control.EndIf
+	
+		f.Intrinsic.Control.If(v.DataTable.dtLinesCheck.Exists,=,true)
+		f.Data.DataTable.Close("dtLinesCheck")
+	f.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.String.LPad(V.Passed.000003,"0",7,v.Local.sPadOrderNo)
+	
+'	'Check table for check box values
+'	F.Intrinsic.String.Build("Select * from GCG_6879_SALES_CHK where ORDER_NO = '{0}'", v.Local.sPadOrderNo, V.Local.sSql)
+'	F.ODBC.Connection!con.OpenLocalRecordsetRW("rstCheck", V.Local.sSql)
+	
+	
+	'Check table for check box values
+	F.Intrinsic.String.Build("Select DISTINCT ORDER_NO,QUALITY, PROCUREMENT_ENG, PRODUCTION from GCG_6879_SALES_LINE where ORDER_NO = '{0}'", v.Local.sPadOrderNo, V.Local.sSql)
+	'F.ODBC.Connection!con.OpenLocalRecordsetRW("rstCheck", V.Local.sSql)
+	f.Data.DataTable.CreateFromSQL("dtLinesCheck","con",v.Local.sSql,true)
+	
+	'All records for Selected order number are the same excluding the line number
+	f.Intrinsic.Control.If(v.DataTable.dtLinesCheck.RowCount,=,1)
+		f.Intrinsic.Control.If(v.DataTable.dtLinesCheck(0).Quality!FieldValTrim,=,"True")
+			v.Passed.GAB-CHK-1.Set("Y")
+		f.Intrinsic.Control.Else
+			v.Passed.GAB-CHK-1.Set("N")
+		f.Intrinsic.Control.EndIf
+		f.Intrinsic.Control.If(v.DataTable.dtLinesCheck(0).PROCUREMENT_ENG!FieldValTrim,=,"True")
+			v.Passed.GAB-CHK-2.Set("Y")
+		f.Intrinsic.Control.Else
+			v.Passed.GAB-CHK-2.Set("N")
+		f.Intrinsic.Control.EndIf
+		f.Intrinsic.Control.If(v.DataTable.dtLinesCheck(0).PRODUCTION!FieldValTrim,=,"True")
+			v.Passed.GAB-CHK-3.Set("Y")
+		f.Intrinsic.Control.Else
+			v.Passed.GAB-CHK-3.Set("N")
+		f.Intrinsic.Control.EndIf
+		
+	f.Intrinsic.Control.Else
+	
+		F.Intrinsic.String.Build("Select * from GCG_6879_SALES_LINE where ORDER_NO = '{0}'", v.Local.sPadOrderNo, V.Local.sSql)
+		f.Data.DataTable.CreateFromSQL("dtAllLines","con",v.Local.sSql,true)
+		
+		f.Intrinsic.Control.For(v.Local.iC,0,v.DataTable.dtAllLines.RowCount--,1)
+			f.Intrinsic.Control.If(v.DataTable.dtAllLines(v.Local.iC).Quality!FieldValTrim,=,"True")
+			f.Intrinsic.Control.AndIf(v.Local.bQualityFlag,=,true)
+				v.Passed.GAB-CHK-1.Set("Y")
+			f.Intrinsic.Control.Else
+				v.Passed.GAB-CHK-1.Set("N")
+				v.Local.bQualityFlag.Set(false)
+			f.Intrinsic.Control.EndIf
+			f.Intrinsic.Control.If(v.DataTable.dtAllLines(v.Local.iC).PROCUREMENT_ENG!FieldValTrim,=,"True")
+			f.Intrinsic.Control.AndIf(v.Local.bProcurementFlag,=,true)
+				v.Passed.GAB-CHK-2.Set("Y")
+			f.Intrinsic.Control.Else
+				v.Passed.GAB-CHK-2.Set("N")
+				v.Local.bProcurementFlag.Set(false)
+			f.Intrinsic.Control.EndIf
+			f.Intrinsic.Control.If(v.DataTable.dtAllLines(v.Local.iC).PRODUCTION!FieldValTrim,=,"True")
+			f.Intrinsic.Control.AndIf(v.Local.bProductionFlag,=,true)
+				v.Passed.GAB-CHK-3.Set("Y")
+			f.Intrinsic.Control.Else
+				v.Passed.GAB-CHK-3.Set("N")
+				v.Local.bProductionFlag.Set(false)
+			f.Intrinsic.Control.EndIf
+		f.Intrinsic.Control.Next(v.Local.iC)
+	
+	f.Intrinsic.Control.EndIf
+
+	'Check Complete Flag
+	F.Intrinsic.String.Build("Select * from GCG_6879_SALES_CHK where ORDER_NO = '{0}'", v.Local.sPadOrderNo, V.Local.sSql)
+	F.ODBC.Connection!con.OpenLocalRecordsetRW("rstCheck", V.Local.sSql)
+	f.Intrinsic.Control.If(V.ODBC.con!rstCheck.EOF,<>,true)
+		f.Intrinsic.Control.If(V.ODBC.con!rstCheck.FieldValTrim.COMPLETE,=,"Y")
+			v.Passed.GAB-TEXT-1.Set("Y")
+		f.Intrinsic.Control.Else
+			v.Passed.GAB-TEXT-1.Set("N")
+		f.Intrinsic.Control.EndIf
+	f.Intrinsic.Control.EndIf
+	
+	f.ODBC.con!rstCheck.Close
+
+	
+	'If not empty, fill check boxes
+'	f.Intrinsic.Control.If(V.ODBC.con!rstCheck.EOF, =, False)
+'	
+'		f.Intrinsic.Control.If(V.ODBC.con!rstCheck.FieldValTrim.QUALITY,=,True)
+'			v.Passed.GAB-CHK-1.Set("Y")
+'			f.Intrinsic.String.Build("{0}\CUSTOM\6879\Quality.txt",v.Caller.GlobalDir,v.Local.sCustomPath)					
+'			f.Intrinsic.File.String2File(v.Local.sCustomPath,v.Passed.GAB-CHK-1)
+'		f.Intrinsic.Control.Else
+'			f.Intrinsic.String.Build("{0}\CUSTOM\6879\Quality.txt",v.Caller.GlobalDir,v.Local.sCustomPath)
+'			f.Intrinsic.File.String2File(v.Local.sCustomPath,"N")
+'		f.Intrinsic.Control.EndIf
+'	
+'		f.Intrinsic.Control.If(V.ODBC.con!rstCheck.FieldValTrim.PROCUREMENT_ENG,=,True)
+'			v.Passed.GAB-CHK-2.Set("Y")
+'		f.Intrinsic.Control.EndIf
+'	
+'		f.Intrinsic.Control.If(V.ODBC.con!rstCheck.FieldValTrim.PRODUCTION,=,True)
+'			v.Passed.GAB-CHK-3.Set("Y")
+'		f.Intrinsic.Control.EndIf
+'		
+'		v.Passed.GAB-TEXT-1.Set(V.ODBC.con!rstCheck.FieldValTrim.COMPLETE)
+'	f.Intrinsic.Control.EndIf
+'	
+'	f.ODBC.con!rstCheck.Close
+	v.Passed.000207.Set(1)
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+f.Intrinsic.Control.EndTry
+Program.Sub.OrderHeaderSelected.End
+
+Program.Sub.OrderLineSelected.Start
+v.Local.sSql.Declare
+v.Local.sPadOrderNo.Declare
+v.Local.sOrderLinePad.Declare
+F.Intrinsic.Control.Try
+	
+	'Clear check boxes for next order
+	v.Passed.GAB-CHK-1.Set("N")
+	v.Passed.GAB-CHK-2.Set("N")
+	v.Passed.GAB-TEXT-1.Set("N")
+	F.Intrinsic.String.LPad(V.Passed.000060,"0",7,v.Local.sPadOrderNo)
+	F.Intrinsic.String.LPad(V.Passed.000051,"0",3,v.Local.sOrderLinePad)
+	
+	'Check table for check box values
+'	F.Intrinsic.String.Build("Select DISTINCT * from GCG_6879_SALES_CHK where ORDER_NO = '{0}'", v.Local.sPadOrderNo, V.Local.sSql)
+'	F.ODBC.Connection!con.OpenLocalRecordsetRW("rstCheck", V.Local.sSql)
+	
+	F.Intrinsic.String.Build("Select * from GCG_6879_SALES_LINE where ORDER_NO = '{0}' and RECORD_NO = '{1}'", v.Local.sPadOrderNo,v.Local.sOrderLinePad ,V.Local.sSql)
+	F.ODBC.Connection!con.OpenLocalRecordsetRW("rstCheck", V.Local.sSql)
+	'f.Data.DataTable.CreateFromSQL("dtLinesCheck","con",v.Local.sSql,true)
+	
+	'If not empty, fill check boxes
+	f.Intrinsic.Control.If(V.ODBC.con!rstCheck.EOF, =, False)
+	
+		f.Intrinsic.Control.If(V.ODBC.con!rstCheck.FieldValTrim.PROCUREMENT_ENG,=,True)
+			v.Passed.GAB-CHK-1.Set("Y")
+		f.Intrinsic.Control.EndIf
+	
+		f.Intrinsic.Control.If(V.ODBC.con!rstCheck.FieldValTrim.PRODUCTION,=,True)
+			v.Passed.GAB-CHK-2.Set("Y")
+		f.Intrinsic.Control.EndIf
+		
+		f.Intrinsic.Control.If(V.ODBC.con!rstCheck.FieldValTrim.QUALITY,=,True)
+			v.Passed.GAB-TEXT-1.Set("Y")
+		f.Intrinsic.Control.EndIf
+		
+	f.Intrinsic.Control.EndIf
+	
+	f.ODBC.con!rstCheck.Close
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+f.Intrinsic.Control.EndTry
+Program.Sub.OrderLineSelected.End
+
+Program.Sub.SaveHeader.Start
+v.Local.sLine.Declare
+v.Local.sSQL.Declare
+v.Local.iRet.Declare
+v.Local.sPadOrderNo.Declare
+v.Local.iQuality.Declare
+v.Local.iProcurement.Declare
+v.Local.iProduction.Declare
+v.Local.sComplete.Declare
+v.Local.iRet1.Declare
+v.Local.sUserGroups.Declare
+v.Local.sCustomPath.Declare
+F.Intrinsic.Control.Try
+
+	f.Global.Security.GetUserGroups(v.Caller.User,v.Caller.CompanyCode,v.Local.sUserGroups)
+	
+	'f.Intrinsic.String.Occurs(v.Local.sUserGroups,"SAQUAL",v.Local.iRet1)
+	'Testing purposes
+	v.Local.iRet1.Set(1)
+	f.Intrinsic.Control.If(v.Local.iRet1,=,0)
+		f.Intrinsic.Control.ExitSub
+	f.Intrinsic.Control.EndIf
+
+'	f.Intrinsic.Control.If(V.Passed.GAB-CHK-1,=,"Y","and",V.Passed.GAB-CHK-2,=,"Y")
+'	f.Intrinsic.Control.AndIf(V.Passed.GAB-CHK-3,=,"Y")
+
+'		'f.Intrinsic.UI.Msgbox("Mark the order as complete?","Complete Order",4,v.Local.iRet)
+
+'		'f.Intrinsic.UI.Msgbox("Mark the order as complete?","Complete Order",4,v.Local.iRet)
+'		'Y if 6 - N if else
+''		f.Intrinsic.Control.If(v.Local.iRet,=,6)
+''			v.Passed.GAB-TEXT-1.Set("Y")
+''		f.Intrinsic.Control.Else
+''			v.Passed.GAB-TEXT-1.Set("N")
+''		f.Intrinsic.Control.EndIf
+'	
+'		F.Intrinsic.String.LPad(V.Passed.000003,"0",7,v.Local.sPadOrderNo)
+'	
+'		'Establish connection to table
+'		F.Intrinsic.String.Build("Select * from GCG_6879_SALES_CHK where ORDER_NO = '{0}'", v.Local.sPadOrderNo, V.Local.sSql)
+'		F.ODBC.Connection!con.OpenLocalRecordsetRW("rstCheck", V.Local.sSql)
+'				
+'		f.Intrinsic.Control.If(V.ODBC.con!rstCheck.EOF,=,False)
+'			
+'			'F.Intrinsic.String.LPad(V.Passed.000003,"0",7,v.Local.sPadOrderNo)
+'			
+'			'Update Records
+'			F.ODBC.con!rstCheck.Set!ORDER_NO(v.Local.sPadOrderNo)
+'			F.ODBC.con!rstCheck.Set!QUALITY(1)		
+'			F.ODBC.con!rstCheck.Set!PROCUREMENT_ENG(1)
+'			F.ODBC.con!rstCheck.Set!PRODUCTION(1)
+'			F.ODBC.con!rstCheck.Set!COMPLETE(v.Passed.GAB-TEXT-1)	
+'		f.Intrinsic.Control.Else
+'			'F.Intrinsic.String.LPad(V.Passed.000003,"0",7,v.Local.sPadOrderNo)
+'			'Add new records
+'			F.ODBC.con!rstCheck.AddNew
+'			F.ODBC.con!rstCheck.Set!ORDER_NO(v.Local.sPadOrderNo)
+'			F.ODBC.con!rstCheck.Set!QUALITY(1)		
+'			F.ODBC.con!rstCheck.Set!PROCUREMENT_ENG(1)
+'			F.ODBC.con!rstCheck.Set!PRODUCTION(1)
+'			F.ODBC.con!rstCheck.Set!COMPLETE(v.Passed.GAB-TEXT-1)	
+'		f.Intrinsic.Control.EndIf
+'			
+'		F.ODBC.con!rstCheck.Update	
+'		
+'		f.ODBC.con!rstCheck.Close
+'	
+''	f.Intrinsic.Control.EndIf
+''	f.Intrinsic.Control.EndIf
+'	f.Intrinsic.Control.Else
+		F.Intrinsic.String.LPad(V.Passed.000003,"0",7,v.Local.sPadOrderNo)
+	
+		'Establish connection to table
+		F.Intrinsic.String.Build("Select * from GCG_6879_SALES_CHK where ORDER_NO = '{0}'", v.Local.sPadOrderNo, V.Local.sSql)
+		F.ODBC.Connection!con.OpenLocalRecordsetRW("rstCheck", V.Local.sSql)
+		
+		f.Intrinsic.Control.If(v.Passed.GAB-CHK-1,=,"Y")
+			v.Local.iQuality.Set(1)
+		f.Intrinsic.Control.Else
+			v.Local.iQuality.Set(0)
+		f.Intrinsic.Control.EndIf
+		
+		f.Intrinsic.Control.If(v.Passed.GAB-CHK-2,=,"Y")
+			v.Local.iProcurement.Set(1)
+		f.Intrinsic.Control.Else
+			v.Local.iProcurement.Set(0)
+		f.Intrinsic.Control.EndIf
+		
+		f.Intrinsic.Control.If(v.Passed.GAB-CHK-3,=,"Y")
+			v.Local.iProduction.Set(1)
+		f.Intrinsic.Control.Else
+			v.Local.iProduction.Set(0)
+		f.Intrinsic.Control.EndIf
+		
+		f.Intrinsic.Control.If(v.Passed.GAB-TEXT-1,=,"Y")
+			v.Local.sComplete.Set("Y")
+		f.Intrinsic.Control.Else
+			v.Local.sComplete.Set("N")
+		f.Intrinsic.Control.EndIf
+		
+		f.Intrinsic.Control.If(V.ODBC.con!rstCheck.EOF,=,False)
+			
+			'F.Intrinsic.String.LPad(V.Passed.000003,"0",7,v.Local.sPadOrderNo)
+			
+			'Update Records
+			F.ODBC.con!rstCheck.Set!ORDER_NO(v.Local.sPadOrderNo)
+			F.ODBC.con!rstCheck.Set!QUALITY(v.Local.iQuality)		
+			F.ODBC.con!rstCheck.Set!PROCUREMENT_ENG(v.Local.iProcurement)
+			F.ODBC.con!rstCheck.Set!PRODUCTION(v.Local.iProduction)
+			F.ODBC.con!rstCheck.Set!COMPLETE(v.Local.sComplete)	
+		f.Intrinsic.Control.Else
+			'F.Intrinsic.String.LPad(V.Passed.000003,"0",7,v.Local.sPadOrderNo)
+			'Add new records
+			F.ODBC.con!rstCheck.AddNew
+			F.ODBC.con!rstCheck.Set!ORDER_NO(v.Local.sPadOrderNo)
+			F.ODBC.con!rstCheck.Set!QUALITY(v.Local.iQuality)		
+			F.ODBC.con!rstCheck.Set!PROCUREMENT_ENG(v.Local.iProcurement)
+			F.ODBC.con!rstCheck.Set!PRODUCTION(v.Local.iProduction)
+			F.ODBC.con!rstCheck.Set!COMPLETE(v.Local.sComplete)	
+		f.Intrinsic.Control.EndIf
+			
+		F.ODBC.con!rstCheck.Update	
+		
+		f.ODBC.con!rstCheck.Close
+		
+	'f.Intrinsic.Control.EndIf
+
+	f.Intrinsic.String.Build("{0}\CUSTOM\6879\Quality.txt",v.Caller.GlobalDir,v.Local.sCustomPath)					
+	f.Intrinsic.File.String2File(v.Local.sCustomPath,v.Passed.GAB-CHK-1)
+
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+f.Intrinsic.Control.EndTry
+Program.Sub.SaveHeader.End
+
+Program.Sub.SaveLine.Start
+v.Local.sLine.Declare
+v.Local.sSQL.Declare
+v.Local.iProcurement.Declare
+v.Local.iProduction.Declare
+v.Local.iQuality.Declare
+v.Local.sOrderNumPad.Declare
+v.Local.sOrderLinePad.Declare
+F.Intrinsic.Control.Try
+	
+	F.Intrinsic.String.LPad(V.Passed.000060,"0",7,v.Local.sOrderNumPad)
+	F.Intrinsic.String.LPad(V.Passed.000051,"0",3,v.Local.sOrderLinePad)
+	
+	'Establish connection to table
+	F.Intrinsic.String.Build("Select * from GCG_6879_SALES_LINE where ORDER_NO = '{0}' and RECORD_NO = '{1}'", v.Local.sOrderNumPad,v.Local.sOrderLinePad, V.Local.sSql)
+	F.ODBC.Connection!con.OpenLocalRecordsetRW("rstCheck", V.Local.sSql)
+	
+	'Procurement/Engineering Box
+	f.Intrinsic.Control.If(v.Passed.GAB-CHK-1,=,"Y")
+		v.Local.iProcurement.Set(1)
+	f.Intrinsic.Control.Else
+		v.Local.iProcurement.Set(0)
+	f.Intrinsic.Control.EndIf
+	
+	'Production Box
+	f.Intrinsic.Control.If(v.Passed.GAB-CHK-2,=,"Y")
+		v.Local.iProduction.Set(1)
+	f.Intrinsic.Control.Else
+		v.Local.iProduction.Set(0)
+	f.Intrinsic.Control.EndIf
+	
+	'Procurement/Engineering Box
+	f.Intrinsic.Control.If(v.Passed.GAB-TEXT-1,=,"Y")
+		v.Local.iQuality.Set(1)
+	f.Intrinsic.Control.Else
+		v.Local.iQuality.Set(0)
+	f.Intrinsic.Control.EndIf
+	
+	f.Intrinsic.Control.If(V.ODBC.con!rstCheck.EOF, =, False)
+		'Update records
+		F.ODBC.con!rstCheck.Set!ORDER_NO(V.Local.sOrderNumPad)
+		F.ODBC.con!rstCheck.Set!RECORD_NO(v.Local.sOrderLinePad)
+		F.ODBC.con!rstCheck.Set!QUALITY(v.Local.iQuality)
+		F.ODBC.con!rstCheck.Set!PROCUREMENT_ENG(v.Local.iProcurement)
+		F.ODBC.con!rstCheck.Set!PRODUCTION(v.Local.iProduction)	
+	f.Intrinsic.Control.Else
+		'Add new records
+		F.ODBC.con!rstCheck.AddNew
+		F.ODBC.con!rstCheck.Set!ORDER_NO(V.Local.sOrderNumPad)
+		F.ODBC.con!rstCheck.Set!RECORD_NO(v.Local.sOrderLinePad)
+		F.ODBC.con!rstCheck.Set!QUALITY(v.Local.iQuality)
+		F.ODBC.con!rstCheck.Set!PROCUREMENT_ENG(v.Local.iProcurement)
+		F.ODBC.con!rstCheck.Set!PRODUCTION(v.Local.iProduction)	
+	f.Intrinsic.Control.EndIf
+	
+	F.ODBC.con!rstCheck.Update
+	
+	f.ODBC.con!rstCheck.Close
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+f.Intrinsic.Control.EndTry
+Program.Sub.SaveLine.End
+
+Program.Sub.PreBI.Start
+v.Local.sCustomPath.Declare
+v.Local.sQuality.Declare
+v.Local.iRet.Declare
+F.Intrinsic.Control.Try
+
+	f.Intrinsic.String.Build("{0}\CUSTOM\6879\Quality.txt",v.Caller.GlobalDir,v.Local.sCustomPath)
+	f.Intrinsic.File.File2String(v.Local.sCustomPath,v.Local.sQuality)
+
+	f.Intrinsic.Control.If(v.Local.sQuality,<>,"Y")
+		v.Passed.CANCEL.Set(1)
+		f.Intrinsic.UI.Msgbox("Order Acknowledgment can't be sent until Quality is checked.","Sales Order Approval",0,v.Local.iRet)
+	f.Intrinsic.Control.Else
+		v.Passed.CANCEL.Set(0)
+	f.Intrinsic.Control.EndIf
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+f.Intrinsic.Control.EndTry
+Program.Sub.PreBI.End
+
+Program.Sub.CreateDir.Start
+V.Local.bRet.Declare(Boolean,False)
+f.Intrinsic.Control.Try
+	
+	'Creating custom directory in Global file path if its not there
+	F.Intrinsic.Control.If(V.Caller.GlobalDir.Right1,=,"\")
+		F.Intrinsic.String.Build("{0}Custom\",V.Caller.GlobalDir,V.Global.sFileLocation)
+	F.Intrinsic.Control.Else
+		F.Intrinsic.String.Build("{0}\Custom\",V.Caller.GlobalDir,V.Global.sFileLocation)
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.File.DirExists(V.Global.sFileLocation,V.Local.bRet)
+	
+	F.Intrinsic.Control.If(V.Local.bRet,=,False)
+		F.Intrinsic.File.CreateDir(V.Global.sFileLocation)
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.String.Build("{0}6879\",V.Global.sFileLocation,V.Global.sFileLocation)
+	
+	F.Intrinsic.File.DirExists(V.Global.sFileLocation,V.Local.bRet)
+	
+	F.Intrinsic.Control.If(V.Local.bRet,=,False)
+		F.Intrinsic.File.CreateDir(V.Global.sFileLocation)
+	F.Intrinsic.Control.EndIf
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+f.Intrinsic.Control.EndTry
+Program.Sub.CreateDir.End
+
+Program.Sub.ErrorMsg.Start
+v.Local.sError.Declare
+f.Intrinsic.String.Build("Project GCG_6879_Sales_Order_Line_Assignment.g2u {0}{0}Subroutine: {1}{0}Error: {2} with Description: {3}", v.Ambient.NewLine, v.Args.CurrentSub, v.Ambient.ErrorNumber, v.Ambient.ErrorDescription, v.Local.sError)
+f.Intrinsic.UI.Msgbox(v.Local.sError)
+f.ODBC.Connection!con.Close
+f.Intrinsic.Control.End
+Program.Sub.ErrorMsg.End
+
+Program.Sub.Comments.Start
+${$5$}$3.0.0.0$}$1
+${$6$}$ghuff$}$20221018141928217$}$s89N93NTeas40rhsU1ZwRbCBj1OiVVM1pd04duiijDB+vSlufzqP2jc+uX9iCL8Bz+SZwFGFmpg=
+Program.Sub.Comments.End
